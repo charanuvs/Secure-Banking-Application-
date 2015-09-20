@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Payment</title>
+
+    <style>
+
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+
+      button {
+        padding: 8px 16px;
+        font-size: 14px;
+      font-family: Georgia, serif;
+      }
+
+      #dialog-form{
+        position: absolute;
+        margin-top: 300px;
+        margin-left: 300px;
+        z-index: 5;
+        padding: 20px;
+        border: 1px solid #999;
+        background: rgba(237,237,237,1); background: -moz-linear-gradient(left, rgba(237,237,237,1) 0%, rgba(217,217,217,1) 32%, rgba(227,227,227,1) 52%, rgba(255,255,255,1) 100%); background: -webkit-gradient(left top, right top, color-stop(0%, rgba(237,237,237,1)), color-stop(32%, rgba(217,217,217,1)), color-stop(52%, rgba(227,227,227,1)), color-stop(100%, rgba(255,255,255,1))); background: -webkit-linear-gradient(left, rgba(237,237,237,1) 0%, rgba(217,217,217,1) 32%, rgba(227,227,227,1) 52%, rgba(255,255,255,1) 100%); background: -o-linear-gradient(left, rgba(237,237,237,1) 0%, rgba(217,217,217,1) 32%, rgba(227,227,227,1) 52%, rgba(255,255,255,1) 100%); background: -ms-linear-gradient(left, rgba(237,237,237,1) 0%, rgba(217,217,217,1) 32%, rgba(227,227,227,1) 52%, rgba(255,255,255,1) 100%); background: linear-gradient(to right, rgba(237,237,237,1) 0%, rgba(217,217,217,1) 32%, rgba(227,227,227,1) 52%, rgba(255,255,255,1) 100%); filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ededed', endColorstr='#ffffff', GradientType=1 );
+        border-radius: 30px;
+      }     
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    
+    <title>PAYMENT</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    
+    <link rel="stylesheet" href="https://d396qusza40orc.cloudfront.net/startup%2Fcode%2Fbootstrap-combined.no-icons.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css">
+    <link rel="stylesheet" href="https://d396qusza40orc.cloudfront.net/startup%2Fcode%2Fsocial-buttons.css">
+    <link href="http://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700,300italic,400italic,500italic,700italic" rel="styleshe\
+et" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700,800"
+    rel="stylesheet" type="text/css">
+
+    </head>
+  <body>
+
+    <div id="dialog-form">
+      <h3>PROVIDE PAYMENT INFORMATION</h3>
+      
+      <div id = 'FromAcc'>
+        From Account: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type='number' id='fromaccvalue'>
+      </div>
+      <div id = 'ToAcc'>
+        To Account: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type='number' id='toaccvalue'>
+      </div>  
+      <div id = 'Amount'>
+        Amount: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type='number' id='amountvalue'>
+      </div>
+      <button id  = "requestpayment" style="margin-right:-10px;"type ="submit">REQUEST PAYMENT</button>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+      <button id  = "resetbutton" type ="submit" onclick = "return resetPaymentDialogValues();">Reset</button>
+
+    </div>
+
+    <button id  = "showpayment" type ="submit" onclick = "return showPayments();">Show Options</button>
+
+    <script>
+
+    
+    d3.select("#dialog-form").style("visibility","hidden");
+    
+    function resetPaymentDialogValues(){
+        $('#fromaccvalue').val("")
+        $('#toaccvalue').val("")
+        $('#amountvalue').val("")
+
+    }
+
+    $("#dialog-form").draggable();
+     
+       function showPayments(){
+
+      d3.select("#dialog-form").style("visibility","visible");
+    }
+    
+    </script>
+  </body>
+
+</html>
