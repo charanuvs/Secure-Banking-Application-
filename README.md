@@ -1,5 +1,7 @@
 Testing the git Repo
 
+We should not USE GITLAB! IT SUCKS!
+
 Andrew was here...
 <<<<<<< HEAD
 ..and Windows is the bwst.
