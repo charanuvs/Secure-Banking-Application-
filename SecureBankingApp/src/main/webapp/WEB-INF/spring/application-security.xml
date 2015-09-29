@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Configuration file for setting up Roles and Authentication -->
+
+<beans:beans
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security.xsd">
+	
+	<http pattern="/static/**" security="none"/>
+	
+	<http pattern="/**" security="none" />
+	
+	<!-- <http use-expressions="true" authentication-manager-ref="userAuthManager">
+		<intercept-url pattern="/message/**" access="isFullyAuthenticated()" />
+		<form-login username-parameter="username" password-parameter="password" 
+			login-page="/user/login"
+			always-use-default-target="true"
+			default-target-url="/message/list"
+			login-processing-url="/user/loginAuth"
+			authentication-failure-url="/user/login?invalidCred=true"
+			authentication-success-handler-ref="svaAppAuthenticationSuccessHandler"
+		/>
+		<logout logout-url="/user/logout" logout-success-url="/user/login"/>
+	</http>  -->
+	
+</beans:beans>
