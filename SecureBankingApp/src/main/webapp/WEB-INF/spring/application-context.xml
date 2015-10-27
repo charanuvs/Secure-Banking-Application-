@@ -64,6 +64,10 @@
 
     <!-- Email service -->
     <bean id="emailService" class="edu.asu.securebanking.service.EmailService"/>
+    
+    <!-- Payment service -->
+    <bean id="transactionService" class="edu.asu.securebanking.service.TransactionService"/>
+    <bean id="transactionDAO" class="edu.asu.securebanking.dao.impl.TransactionDAOImpl"/>
 
 
     <!-- service -->

@@ -84,6 +84,11 @@ public final class AppConstants {
 
     public static final double MAX_BALANCE = 1000000;
 
+
+    public static final Map<String, String> TRANSACTION_TYPES =
+            new HashMap<String, String>();
+
+
     static {
         GENDERS.put(GENDER_MALE, "Male");
         GENDERS.put(GENDER_FEMALE, "Female");
@@ -119,6 +124,9 @@ public final class AppConstants {
 
         // Account type merchant
         ACCOUNT_TYPES_MERCHANT.put(ACCOUNT_CHECKIN, "Merchant");
+        
+        TRANSACTION_TYPES.put("TRANSFER", "Transfer");
+        TRANSACTION_TYPES.put("PAYMENT", "Payment");
 
     }
 }

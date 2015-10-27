@@ -22,5 +22,5 @@ public class TransactionService {
     public void addTransaction(Transaction transaction) {
         
         transactionDAO.addTransaction(transaction);
-    }
+    }   
 }

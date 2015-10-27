@@ -14,6 +14,7 @@ import edu.asu.securebanking.beans.Account;
 import edu.asu.securebanking.beans.AppUser;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -60,22 +61,16 @@ public class PaymentController {
     private Validator paymentValidator;
     */
     @RequestMapping(value = "/user/payment", method = RequestMethod.GET)
-    public String payment(final Model model) {
+    public String payment(@ModelAttribute("transaction") Transaction transaction, final Model model) {
 		PageViewBean page = new PageViewBean();
 		model.addAttribute("page", page);
+		
+		model.addAttribute("types", AppConstants.TRANSACTION_TYPES);
 		
 		return "user/payment";
 	}
     
-    /**
-     * Add a external user
-     *
-     * @param user
-     * @param model
-     * @param result
-     * @return view
-     * @throws AppBusinessException 
-     */
+
     
     @RequestMapping(value = "/user/payment/confirm",
             method = RequestMethod.POST)
@@ -83,6 +78,8 @@ public class PaymentController {
                           Model model,
                           BindingResult result,
                           HttpSession session) throws AppBusinessException {
+    	
+    	LOGGER.info(transaction);
 
         PageViewBean page = new PageViewBean();
         model.addAttribute("page", page);
@@ -93,14 +90,15 @@ public class PaymentController {
         Account toAccount = accountService.getAccount(toAccountNumberInt);
         Account fromAccount = accountService.getAccount(fromAccountNumberInt);
         
-        String transType = transaction.getTransactionTypeString();
+        String transType = transaction.getTransactionType();
         
-        if(transType.equals("Payment")) {
+        if(transType.equals("PAYMENT")) {
         	if(toAccount.getAccountType().equals("MERCHANT")) {
         	
         		transaction.setToAccount(toAccount);
         		transaction.setFromAccount(fromAccount);
-	            transaction.setAmount(Double.parseDouble(transaction.getAmountString()));            
+        		BigDecimal amount = new BigDecimal(Double.parseDouble(transaction.getAmountString()),MathContext.DECIMAL64);
+	            transaction.setAmount(amount);            
 	        	transaction.setTransactionType(new String("PAYMENT"));            
 	            transaction.setStatus(new String("PENDING"));
 	            
@@ -115,8 +113,8 @@ public class PaymentController {
 	                    session.getAttribute(AppConstants.LOGGEDIN_USER);
 	            
 	            session.setAttribute("user.payment", transaction);
-
-	            //transactionService.addTransaction(transaction);
+	            LOGGER.info("Transnew: " + transaction);
+	            transactionService.addTransaction(transaction);
 	            /*
 	            // OTP and send the message
 	            String otp = otpService.generateOTP();
@@ -129,13 +127,16 @@ public class PaymentController {
 	        else
 	        	LOGGER.warn("To Account is not Merchant for account number "+toAccount.getAccountNum().toString());
         }
-        else if(transType.equals("Transaction")) {
+        else if(transType.equals("TRANSFER")) {
         	if(!(toAccount.getAccountType().equals("MERCHANT"))) {
         	
         		transaction.setToAccount(toAccount);
         		transaction.setFromAccount(fromAccount);
-	            transaction.setAmount(Double.parseDouble(transaction.getAmountString()));            
-	        	transaction.setTransactionType(new String("TRANSACTION"));            
+
+        		BigDecimal amount = new BigDecimal(Double.parseDouble(transaction.getAmountString()),MathContext.DECIMAL64);
+	            transaction.setAmount(amount);            
+ 
+	        	transaction.setTransactionType(new String("TRANSFER"));            
 	            transaction.setStatus(new String("PENDING"));
 	            
 	            Date currentDate = new Date();
@@ -150,7 +151,7 @@ public class PaymentController {
 	            
 	            session.setAttribute("user.payment", transaction);
 
-	            //transactionService.addTransaction(transaction);
+	            transactionService.addTransaction(transaction);
 	            /*
 	            // OTP and send the message
 	            String otp = otpService.generateOTP();

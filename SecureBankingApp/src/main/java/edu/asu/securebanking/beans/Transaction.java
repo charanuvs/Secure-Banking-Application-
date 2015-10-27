@@ -1,7 +1,8 @@
 package edu.asu.securebanking.beans;
 
 import javax.persistence.*;
-
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "TRANSACTION")
-public class Transaction {
+public class Transaction implements Serializable {
 
     @Id
     @Column(name = "T_ID")
@@ -25,7 +26,7 @@ public class Transaction {
     private Account fromAccount;
 
     @Column(name = "AMOUNT")
-    private Double amount;
+    private BigDecimal amount;
 
     @Column(name = "T_TYPE", columnDefinition = "enum('TRANSFER', 'PAYMENT')")
     private String transactionType;
@@ -46,29 +47,43 @@ public class Transaction {
 
     @Transient
     private String fromAccountNumber;
-    
+
     @Transient
     private String transactionTypeString;
-    
+
     @Transient
     private String amountString;
-    
-    public String getAmountString() {	
-    	return amountString;
-    }
-    
-    public String getTransactionTypeString() {
-    	return transactionTypeString;
-    }
-    
+
     public String getToAccountNumber() {
-    	
-    	return toAccountNumber;
+        return toAccountNumber;
     }
-    
+
+    public void setToAccountNumber(String toAccountNumber) {
+        this.toAccountNumber = toAccountNumber;
+    }
+
     public String getFromAccountNumber() {
-    	
-    	return fromAccountNumber;
+        return fromAccountNumber;
+    }
+
+    public void setFromAccountNumber(String fromAccountNumber) {
+        this.fromAccountNumber = fromAccountNumber;
+    }
+
+    public String getTransactionTypeString() {
+        return transactionTypeString;
+    }
+
+    public void setTransactionTypeString(String transactionTypeString) {
+        this.transactionTypeString = transactionTypeString;
+    }
+
+    public String getAmountString() {
+        return amountString;
+    }
+
+    public void setAmountString(String amountString) {
+        this.amountString = amountString;
     }
 
     public Integer getTransactionId() {
@@ -95,11 +110,11 @@ public class Transaction {
         this.fromAccount = fromAccount;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -146,6 +161,10 @@ public class Transaction {
                 ", status='" + status + '\'' +
                 ", date=" + date +
                 ", authEmployee=" + authEmployee +
+                ", toAccountNumber='" + toAccountNumber + '\'' +
+                ", fromAccountNumber='" + fromAccountNumber + '\'' +
+                ", transactionTypeString='" + transactionTypeString + '\'' +
+                ", amountString='" + amountString + '\'' +
                 '}';
     }
 }

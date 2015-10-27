@@ -59,7 +59,7 @@ public class AccountService {
      * @param accountNum
      * @return account
      */
-    
+    @Transactional
     public Account getAccount(Integer accountNum) throws AppBusinessException {
     	return accountDAO.getAccount(accountNum);
     }
