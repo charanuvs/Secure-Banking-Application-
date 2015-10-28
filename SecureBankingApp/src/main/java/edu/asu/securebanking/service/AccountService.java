@@ -99,4 +99,11 @@ public class AccountService {
 
         accountDAO.addAccount(account);
     }
+    
+    @Transactional(rollbackOn = Throwable.class)
+    public void updateAccount(Account account)
+            throws AppBusinessException {
+        accountDAO.updateAccount(account);
+    }
+    
 }

@@ -22,6 +22,7 @@
             <jsp:include page="../logout_inc.jsp"/>
 
             <ul class="nav navbar-nav navbar-right">
+                <li class="active"><a href="<c:url value='/manage/transactions/list' />">Pending Transactions</a></li>
                 <li class="active"><a href="<c:url value='/manage/user/add' />">Add User</a></li>
                 <li class="active"><a href="<c:url value='/manage/user/list' />">List Users</a></li>
                 <li class="active"><a href="<c:url value='/all/update' />">Update Info</a></li>

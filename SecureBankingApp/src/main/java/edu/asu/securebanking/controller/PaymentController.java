@@ -70,11 +70,10 @@ public class PaymentController {
 		return "user/payment";
 	}
     
-
     
-    @RequestMapping(value = "/user/payment/confirm",
+    @RequestMapping(value = "/user/payment/validate",
             method = RequestMethod.POST)
-    public void addTransaction(@ModelAttribute("transaction") Transaction transaction,
+    public String addTransaction(@ModelAttribute("transaction") Transaction transaction,
                           Model model,
                           BindingResult result,
                           HttpSession session) throws AppBusinessException {
@@ -91,78 +90,67 @@ public class PaymentController {
         Account fromAccount = accountService.getAccount(fromAccountNumberInt);
         
         String transType = transaction.getTransactionType();
+        BigDecimal amount = new BigDecimal(Double.parseDouble(transaction.getAmountString()),MathContext.DECIMAL64);
         
-        if(transType.equals("PAYMENT")) {
-        	if(toAccount.getAccountType().equals("MERCHANT")) {
+        
+        // check if both accounts exist and are distinct
+        if (toAccount == null || fromAccount == null || toAccountNumberInt == fromAccountNumberInt) {
+        	session.setAttribute("transaction.err", "Your transaction was not processed. \nPlease provide two valid and distinct account numbers.");
+        	return "/user/payment-deny";
         	
-        		transaction.setToAccount(toAccount);
-        		transaction.setFromAccount(fromAccount);
-        		BigDecimal amount = new BigDecimal(Double.parseDouble(transaction.getAmountString()),MathContext.DECIMAL64);
-	            transaction.setAmount(amount);            
-	        	transaction.setTransactionType(new String("PAYMENT"));            
-	            transaction.setStatus(new String("PENDING"));
-	            
-	            Date currentDate = new Date();
-	            
-	            //Date Format needs to be like yyyy-mm-dd
-	            transaction.setDate(currentDate);
-	            
-	            session.setAttribute("user.payment", transaction);
-	
-	            AppUser loggedInUser = (AppUser)
-	                    session.getAttribute(AppConstants.LOGGEDIN_USER);
-	            
-	            session.setAttribute("user.payment", transaction);
-	            LOGGER.info("Transnew: " + transaction);
-	            transactionService.addTransaction(transaction);
-	            /*
-	            // OTP and send the message
-	            String otp = otpService.generateOTP();
-	            session.setAttribute("payment.otp", otp);
-	            // send email
-	            emailService.sendEmail(loggedInUser.getEmail(), "OTP to process your payment",
-	                    "The OTP to process your payment: " + otp);
-	            */
-	        }
-	        else
-	        	LOGGER.warn("To Account is not Merchant for account number "+toAccount.getAccountNum().toString());
         }
-        else if(transType.equals("TRANSFER")) {
-        	if(!(toAccount.getAccountType().equals("MERCHANT"))) {
-        	
-        		transaction.setToAccount(toAccount);
-        		transaction.setFromAccount(fromAccount);
+        // check if user owns the from account
+        else if (!fromAccount.getUser().getUserId().equals(session.getAttribute(AppConstants.LOGGEDIN_USER))) {
+        	session.setAttribute("transaction.err", "Your transaction was not processed. \nYou must be the owner of the source acount.");
+        	return "/user/payment-deny";
+        }
+        
+        // Check if account types are appropriate for payment or transfer
+        else if (!(transType.equals("PAYMENT") 
+        		&& toAccount.getAccountType().equals("MERCHANT")
+        		|| transType.equals("TRANSFER") 
+        		&& !(toAccount.getAccountType().equals("MERCHANT")))) {
+        	session.setAttribute("transaction.err", "Your transaction was not processed. \nPayment transactions must be to a merchant acount, and transfers must be to user acounts.");
+        	return "/user/payment-deny";
+        } 
+        // check if user has sufficient funds
+        else if (fromAccount.getBalance().compareTo(amount) == -1) {
+        	session.setAttribute("transaction.err", "Your transaction was not processed. \nReason: Insufficient funds.");
+        	return "/user/payment-deny";
+        }
+        // process the transaction
+        else {
 
-        		BigDecimal amount = new BigDecimal(Double.parseDouble(transaction.getAmountString()),MathContext.DECIMAL64);
-	            transaction.setAmount(amount);            
- 
-	        	transaction.setTransactionType(new String("TRANSFER"));            
-	            transaction.setStatus(new String("PENDING"));
-	            
-	            Date currentDate = new Date();
-	            
-	            //Date Format needs to be like yyyy-mm-dd
-	            transaction.setDate(currentDate);
-	            
-	            session.setAttribute("user.payment", transaction);
-	
-	            AppUser loggedInUser = (AppUser)
-	                    session.getAttribute(AppConstants.LOGGEDIN_USER);
-	            
-	            session.setAttribute("user.payment", transaction);
+    		transaction.setToAccount(toAccount);
+    		transaction.setFromAccount(fromAccount);
+    		
+            transaction.setAmount(amount);      
+        	transaction.setTransactionType(transType);            
+            transaction.setStatus(new String("PENDING"));
+            
+            Date currentDate = new Date();
+            
+            //Date Format needs to be like yyyy-mm-dd
+            transaction.setDate(currentDate);
+            
+            session.setAttribute("user.payment", transaction);
 
-	            transactionService.addTransaction(transaction);
-	            /*
-	            // OTP and send the message
-	            String otp = otpService.generateOTP();
-	            session.setAttribute("payment.otp", otp);
-	            // send email
-	            emailService.sendEmail(loggedInUser.getEmail(), "OTP to process your payment",
-	                    "The OTP to process your payment: " + otp);
-	            */
-	        }
-	        else
-	        	LOGGER.warn("To Account is a Merchant account for account number "+toAccount.getAccountNum().toString());
+            AppUser loggedInUser = (AppUser)
+                    session.getAttribute(AppConstants.LOGGEDIN_USER);
+            
+            session.setAttribute("user.payment", transaction);
+            LOGGER.info("Transnew: " + transaction);
+            transactionService.addTransaction(transaction);
+            /*
+            // OTP and send the message
+            String otp = otpService.generateOTP();
+            session.setAttribute("payment.otp", otp);
+            // send email
+            emailService.sendEmail(loggedInUser.getEmail(), "OTP to process your payment",
+                    "The OTP to process your payment: " + otp);
+            */
+            
+            return "/user/payment-confirm";
         }
     }
 }

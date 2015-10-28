@@ -15,13 +15,13 @@
     <jsp:include page="../js.jsp"></jsp:include>
 </head>
 <body>
-<jsp:include page="../nav.jsp"></jsp:include>
+<jsp:include page="nav.jsp"></jsp:include>
 
 <div class="container col-sm-6 col-sm-offset-3 ">
 
 
     <div class="well">
-        <c:url var="formAction" value="/user/payment/confirm"/>
+        <c:url var="formAction" value="/user/payment/validate"/>
         <form:form method="post"
                    class="form-horizontal" commandName="transaction" action="${formAction}">
             <legend>Update Info</legend>

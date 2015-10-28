@@ -13,6 +13,7 @@ import java.util.List;
 /**
  * Created by Vikranth on 10/20/2015.
  * Updated by Rishabh on 10/25/2015.
+ * Updated by Andrew on 10/28/2015.
  */
 public class AccountDAOImpl extends AbstractDAO implements AccountDAO {
 
@@ -34,4 +35,13 @@ public class AccountDAOImpl extends AbstractDAO implements AccountDAO {
     public void addAccount(Account account) {
         getSession().save(account);
     }
+    
+    @Override
+    public void updateAccount(Account account) {
+    	getSession().update(account);
+    }
 }
+
+
+
+

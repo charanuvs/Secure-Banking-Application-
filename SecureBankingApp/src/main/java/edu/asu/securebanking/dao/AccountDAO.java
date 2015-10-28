@@ -32,4 +32,6 @@ public interface AccountDAO {
      * @param account
      */
     public void addAccount(Account account);
+    
+    public void updateAccount(Account account);
 }
