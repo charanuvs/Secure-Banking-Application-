@@ -1,6 +1,7 @@
 package edu.asu.securebanking.controller;
 
 import edu.asu.securebanking.beans.AppUser;
+import edu.asu.securebanking.util.AppUtil;
 import edu.asu.securebanking.beans.PageViewBean;
 import edu.asu.securebanking.beans.PasswordBean;
 import edu.asu.securebanking.constants.AppConstants;
@@ -20,13 +21,32 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
+
+import javax.crypto.Cipher;
+//import org.springframework.boot.autoconfigure.SpringBootApplication;
 import javax.servlet.http.HttpSession;
 
 /**
  * Created by Vikranth on 10/20/2015.
  */
 @Controller
+//@SpringBootApplication
 public class AllUserController {
 
     @Autowired
@@ -187,11 +207,17 @@ public class AllUserController {
             method = RequestMethod.GET)
     public String updateInfo(Model model,
                              HttpSession session) {
-
+    	
         AppUser loggedInUser = (AppUser) session.getAttribute(AppConstants.LOGGEDIN_USER);
         PageViewBean page = new PageViewBean();
         model.addAttribute("page", page);
-
+        
+        if(!isUserPKIQualified(session))
+        {
+        	return "redirect:/all/key";
+        }
+        
+        
         AppUser user;
         try {
 
@@ -232,7 +258,12 @@ public class AllUserController {
         model.addAttribute("page", page);
         // From session
         AppUser updateUser = (AppUser) session.getAttribute("updateUser");
-
+        
+        if(!isUserPKIQualified(session))
+        {
+        	return "redirect:/all/key";
+        }
+        
         try {
             if (updateUser == null) {
                 updateUser = userService.getUser(loggedInUser.getUserId());
@@ -255,6 +286,7 @@ public class AllUserController {
             // No errors
             page.setValid(true);
             page.setMessage("Your information has been updated!");
+            session.removeAttribute("PKI_Check_Passed");
             return "message";
 
         } catch (Exception e) {
@@ -264,6 +296,97 @@ public class AllUserController {
 
             return "message";
         }
+    }
+    
+    @RequestMapping(value="all/key", method=RequestMethod.GET)
+    public String key(Model model,
+    				HttpSession session)
+    {
+    	AppUser loggedInUser = (AppUser) session.getAttribute(AppConstants.LOGGEDIN_USER);
+        PageViewBean page = new PageViewBean();
+        model.addAttribute("page", page);
+
+        AppUser user;
+        try {
+        	
+        	Decoder decoder = Base64.getDecoder();
+            // Def get from database
+            user = userService.getUser(loggedInUser.getUserId());
+            session.setAttribute("updateUser", user);
+            model.addAttribute("user", user);
+            model.addAttribute("redr", "key");
+            
+        	String secret = user.getUserId()+AppUtil.getRandomPwd(15);
+        	session.setAttribute("secret", secret);
+        	
+        	File pub = new File(AppConstants.KEY_PATH+user.getUserId()+"_pub.txt");
+    	    FileInputStream pubfis = new FileInputStream(pub);
+    	    DataInputStream pubdis = new DataInputStream(pubfis);
+    	    byte[] pubBytes = new byte[(int)pub.length()];
+    	    pubdis.readFully(pubBytes);
+    	    pubdis.close();
+
+    	    X509EncodedKeySpec pubspec =
+    	      new X509EncodedKeySpec(decoder.decode(pubBytes));
+    	    KeyFactory pubkf = KeyFactory.getInstance("RSA");
+    	    Key publickey = pubkf.generatePublic(pubspec);
+    	    
+    	    // Get an instance of the Cipher for RSA encryption/decryption
+    	    Cipher c = Cipher.getInstance("RSA");
+    	    // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
+    	    c.init(Cipher.ENCRYPT_MODE, publickey); 
+    	    
+    	    byte[] encryptedBytes = c.doFinal(secret.getBytes());
+    	    //System.out.println(new String(encryptedBytes));
+    	    Encoder encoder = Base64.getEncoder();
+    	    byte[] encodedencmessage = encoder.encode(encryptedBytes);
+    	    String challengeString = new String(encodedencmessage);
+    	    
+    	    model.addAttribute("challengeString", challengeString);
+        	
+            return "all/pki";
+            
+        }catch (Exception e) {
+            page.setValid(false);
+            page.setMessage(AppConstants.DEFAULT_ERROR_MSG);
+            LOGGER.error(e.getMessage());
+
+            return "message";
+        }
+    }
+    
+    @RequestMapping(value="all/key", method=RequestMethod.POST)
+    public String handleKey(HttpSession session,
+            @RequestParam("secret") String submittedSecret,
+            Model model){
+    	PageViewBean page = new PageViewBean();
+        model.addAttribute("page", page);
+            try {
+            	AppUser loggedInUser = (AppUser) session.getAttribute(AppConstants.LOGGEDIN_USER);
+            	String challengeString = AppUtil.getRandomPwd(15);
+            	
+            	//----------------------Encrypting and Encoding using uploaded key------------------
+            	
+            	if(submittedSecret.equals((String) session.getAttribute("secret")))
+            	{
+            		session.setAttribute("PKI_Check_Passed", "true");
+            	}
+            	else
+            	{
+            		session.setAttribute("PKI_Check_Passed", "false");
+            		page.setValid(false);
+            		page.setMessage("Secret code does not match.");
+            		return "message";
+            	}
+            	
+                return "redirect:/all/update";
+            } catch (Exception e) {
+            	page.setValid(false);
+                page.setMessage(AppConstants.DEFAULT_ERROR_MSG);
+                LOGGER.error(e.getMessage());
+
+                return "message";
+            }
     }
 
     /**
@@ -277,5 +400,12 @@ public class AllUserController {
         dbUser.setEmail(reqUser.getEmail());
         dbUser.setAddress(reqUser.getAddress());
         dbUser.setPhoneNumber(reqUser.getPhoneNumber());
+    }
+    
+    private boolean isUserPKIQualified(HttpSession session)
+    {
+    	String PKIFlag = (String)session.getAttribute("PKI_Check_Passed");
+    	return StringUtils.hasText(PKIFlag) && PKIFlag.equals("true");
+    	
     }
 }

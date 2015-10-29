@@ -3,94 +3,91 @@
 <!-- Configuration file for global context beans (global scope) -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/context
 	http://www.springframework.org/schema/context/spring-context.xsd
 	http://www.springframework.org/schema/tx
 	http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-    <context:property-placeholder location="classpath:database.properties"/>
+	<context:property-placeholder location="classpath:database.properties" />
 
-    <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+	<tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
 
-    <context:annotation-config/>
+	<context:annotation-config />
 
-    <!-- Datasource -->
-    <import resource="data-source.xml"/>
-    <!-- end -->
+	<!-- Datasource -->
+	<import resource="data-source.xml" />
+	<!-- end -->
 
-    <!-- Hibernate -->
-    <import resource="hibernate.xml"/>
-    <!-- end -->
+	<!-- Hibernate -->
+	<import resource="hibernate.xml" />
+	<!-- end -->
 
-    <!-- Message source -->
-    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basename" value="message"/>
-    </bean>
+	<!-- Message source -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename" value="message" />
+	</bean>
 
-    <bean id="persistenceExceptionTranslationPostProcessor"
-          class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 
-    <!-- DAO -->
-    <bean class="edu.asu.securebanking.dao.impl.UserDAOImpl"
-          id="userDAO"></bean>
-    <bean class="edu.asu.securebanking.dao.impl.AccountDAOImpl"
-          id="accountDAO"/>
+	<!-- DAO -->
+	<bean class="edu.asu.securebanking.dao.impl.UserDAOImpl" id="userDAO"></bean>
+	<bean class="edu.asu.securebanking.dao.impl.AccountDAOImpl" id="accountDAO" />
 
-    <!-- password -->
-    <bean class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"
-          id="pwdEncoder">
-        <constructor-arg value="12"></constructor-arg>
-    </bean>
+	<!-- password -->
+	<bean
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"
+		id="pwdEncoder">
+		<constructor-arg value="12"></constructor-arg>
+	</bean>
 
-    <!-- Email conf -->
-    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-        <property name="host" value="smtp.gmail.com"/>
-        <property name="port" value="587"/>
-        <property name="username" value="cse545.ss"/>
-        <property name="password" value="softwaresecurity"/>
+	<!-- Email conf -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com" />
+		<property name="port" value="587" />
+		<property name="username" value="cse545.ss" />
+		<property name="password" value="softwaresecurity" />
 
-        <property name="javaMailProperties">
-            <props>
-                <prop key="mail.smtp.auth">true</prop>
-                <prop key="mail.smtp.starttls.enable">true</prop>
-            </props>
-        </property>
-    </bean>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+			</props>
+		</property>
+	</bean>
 
-    <!-- Email service -->
-    <bean id="emailService" class="edu.asu.securebanking.service.EmailService"/>
+	<!-- Email service -->
+	<bean id="emailService" class="edu.asu.securebanking.service.EmailService" />
 
 
-    <!-- service -->
-    <bean class="edu.asu.securebanking.service.LoginService"
-          id="loginService"></bean>
-    <bean class="edu.asu.securebanking.service.UserService"
-          id="userService"></bean>
-    <bean id="otpService" class="edu.asu.securebanking.service.OTPService"
-            />
-    <bean id="accountService" class="edu.asu.securebanking.service.AccountService"/>
+	<!-- service -->
+	<bean class="edu.asu.securebanking.service.PKIService" id="pkiService"></bean>
+	<bean class="edu.asu.securebanking.service.LoginService" id="loginService"></bean>
+	<bean class="edu.asu.securebanking.service.UserService" id="userService"></bean>
+	<bean id="otpService" class="edu.asu.securebanking.service.OTPService" />
+	<bean id="accountService" class="edu.asu.securebanking.service.AccountService" />
 
-    <!-- validators -->
-    <bean class="edu.asu.securebanking.util.LoginFormValidator"
-          id="loginFormValidator"/>
+	<!-- validators -->
+	<bean class="edu.asu.securebanking.util.LoginFormValidator" id="loginFormValidator" />
 
-    <bean class="edu.asu.securebanking.util.InternalUserValidator"
-          id="internalUserValidator"/>
+	<bean class="edu.asu.securebanking.util.InternalUserValidator" id="internalUserValidator" />
 
-    <bean class="edu.asu.securebanking.util.ExternalUserValidator"
-          id="externalUserValidator"/>
+	<bean class="edu.asu.securebanking.util.ExternalUserValidator" id="externalUserValidator" />
 
-    <bean class="edu.asu.securebanking.util.AppUserValidator"
-          id="appUserValidator"/>
+	<bean class="edu.asu.securebanking.util.AppUserValidator" id="appUserValidator" />
 
-    <bean class="edu.asu.securebanking.util.PasswordValidator"
-          id="passwordValidator"/>
-    <bean class="edu.asu.securebanking.util.AccountValidator"
-          id="accountValidator"/>
+	<bean class="edu.asu.securebanking.util.PasswordValidator" id="passwordValidator" />
+	<bean class="edu.asu.securebanking.util.AccountValidator" id="accountValidator" />
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- one of the properties available; the maximum file size in bytes -->
+		<property name="maxUploadSize" value="100000" />
+	</bean>
 
 </beans>

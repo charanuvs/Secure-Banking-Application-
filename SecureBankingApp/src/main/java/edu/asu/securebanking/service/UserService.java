@@ -1,6 +1,7 @@
 package edu.asu.securebanking.service;
 
 import edu.asu.securebanking.beans.AppUser;
+import edu.asu.securebanking.service.PKIService;
 import edu.asu.securebanking.beans.PasswordBean;
 import edu.asu.securebanking.constants.AppConstants;
 import edu.asu.securebanking.dao.UserDAO;
@@ -33,6 +34,9 @@ public class UserService {
     @Autowired
     @Qualifier("messageSource")
     private ResourceBundleMessageSource messageSource;
+    
+    @Autowired
+    private PKIService pkiService;
 
     protected static Logger LOGGER = Logger.getLogger(UserService.class);
 
@@ -55,6 +59,12 @@ public class UserService {
         // Hash the password of the user
         user.setPassword(encoder.encode(user.getPassword()));
         userDAO.addUser(user);
+        try {
+			pkiService.generateKeyAndSendToUser(user.getUserId(),user.getEmail());
+		} catch (Exception e) {
+			// Handle
+		}
+        
     }
 
     /**

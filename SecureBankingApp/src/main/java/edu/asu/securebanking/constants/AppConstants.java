@@ -15,6 +15,8 @@ public final class AppConstants {
     /**
      * Default DOC title
      */
+    public static final String KEY_PATH = "C:\\keys\\";
+    
     public static final String DOC_TITLE = "XYZ Bank";
 
     public static final String ROLE_NORMAL = "ROLE_NORMAL";

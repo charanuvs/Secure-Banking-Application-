@@ -2,45 +2,44 @@
 
 <!-- Configuration file for setting up Roles and Authentication -->
 
-<beans:beans
-        xmlns:beans="http://www.springframework.org/schema/beans"
-        xmlns="http://www.springframework.org/schema/security"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.springframework.org/schema/beans
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/security" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/security
 	http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <http pattern="/static/**" security="none"/>
+	<http pattern="/static/**" security="none" />
 
-    <http use-expressions="true" authentication-manager-ref="userAuthManager">
-        <!--<csrf disabled="true"/>-->
-        <intercept-url pattern="/user/**" access="hasRole('ROLE_NORMAL')"/>
-        <intercept-url pattern="/emp/**" access="hasRole('ROLE_EMPLOYEE')"/>
-        <intercept-url pattern="/manage/**" access="hasRole('ROLE_MANAGER')"/>
-        <intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')"/>
-        <intercept-url pattern="/merch/**" access="hasRole('ROLE_MERCHANT')"/>
-        <intercept-url pattern="/logout" access="hasAnyRole('ROLE_EMPLOYEE',
-            'ROLE_NORMAL', 'ROLE_ADMIN', 'ROLE_MERCHANT', 'ROLE_MANAGER')"/>
-        <intercept-url pattern="/all/**" access="hasAnyRole('ROLE_EMPLOYEE',
-            'ROLE_NORMAL', 'ROLE_ADMIN', 'ROLE_MERCHANT', 'ROLE_MANAGER')"/>
-        <form-login username-parameter="username" password-parameter="password"
-                    login-page="/login"
-                    always-use-default-target="true"
-                    default-target-url="/redirect"
-                    login-processing-url="/loginAuth"
-                    authentication-failure-url="/login?invalidCred=true"
-                    authentication-success-handler-ref="appAuthSuccessHandler"
-                />
-        <logout logout-url="/logout" logout-success-url="/login"/>
-    </http>
+	<http use-expressions="true" authentication-manager-ref="userAuthManager">
+		<!--<csrf disabled="true"/> -->
+		<intercept-url pattern="/user/**" access="hasRole('ROLE_NORMAL')" />
+		<intercept-url pattern="/emp/**" access="hasRole('ROLE_EMPLOYEE')" />
+		<intercept-url pattern="/manage/**" access="hasRole('ROLE_MANAGER')" />
+		<intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+		<intercept-url pattern="/merch/**" access="hasRole('ROLE_MERCHANT')" />
+		<intercept-url pattern="/logout"
+			access="hasAnyRole('ROLE_EMPLOYEE',
+            'ROLE_NORMAL', 'ROLE_ADMIN', 'ROLE_MERCHANT', 'ROLE_MANAGER')" />
+		<intercept-url pattern="/all/**"
+			access="hasAnyRole('ROLE_EMPLOYEE',
+            'ROLE_NORMAL', 'ROLE_ADMIN', 'ROLE_MERCHANT', 'ROLE_MANAGER')" />
+		<form-login username-parameter="username"
+			password-parameter="password" login-page="/login"
+			always-use-default-target="true" default-target-url="/redirect"
+			login-processing-url="/loginAuth" authentication-failure-url="/login?invalidCred=true"
+			authentication-success-handler-ref="appAuthSuccessHandler" />
+		<logout logout-url="/logout" logout-success-url="/login" />
+	</http>
 
-    <authentication-manager id="userAuthManager">
-        <authentication-provider user-service-ref="userAuthService">
-            <password-encoder ref="pwdEncoder"></password-encoder>
-        </authentication-provider>
-    </authentication-manager>
+	<authentication-manager id="userAuthManager">
+		<authentication-provider user-service-ref="userAuthService">
+			<password-encoder ref="pwdEncoder"></password-encoder>
+		</authentication-provider>
+	</authentication-manager>
 
-    <beans:bean id="userAuthService" class="edu.asu.securebanking.service.AppUserDetailsService"></beans:bean>
-    <beans:bean class="edu.asu.securebanking.util.AppAuthSuccessHandler" id="appAuthSuccessHandler"></beans:bean>
+	<beans:bean id="userAuthService"
+		class="edu.asu.securebanking.service.AppUserDetailsService"></beans:bean>
+	<beans:bean class="edu.asu.securebanking.util.AppAuthSuccessHandler"
+		id="appAuthSuccessHandler"></beans:bean>
 </beans:beans>
