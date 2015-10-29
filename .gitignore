@@ -1,1 +1,5 @@
-/target
+/target 
+SecureBankingApp/src/main/java/edu/asu/securebanking/beans/Account.java
+SecureBankingApp/src/main/java/edu/asu/securebanking/beans/AppUser.java
+SecureBankingApp/src/main/java/edu/asu/securebanking/beans/PII.java
+SecureBankingApp/src/main/java/edu/asu/securebanking/beans/Transaction.java

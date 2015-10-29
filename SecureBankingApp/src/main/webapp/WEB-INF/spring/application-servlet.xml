@@ -32,6 +32,8 @@
     </bean>
     <bean class="edu.asu.securebanking.view.AccountExcelView"
           id="accountExcelView"/>
+    <bean class="edu.asu.securebanking.view.AccountPdfView"
+          id="accountPdfView"/>
     <!-- Views end -->
 
     <!-- resources -->

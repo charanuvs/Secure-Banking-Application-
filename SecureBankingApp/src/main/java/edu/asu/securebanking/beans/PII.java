@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(
-        name = "PII",
+        name = "pii",
         uniqueConstraints = {@UniqueConstraint(columnNames = {"USER_ID", "FROM_USER_ID"})}
 )
 public class PII implements Serializable {

@@ -10,6 +10,8 @@ import edu.asu.securebanking.service.AccountService;
 import edu.asu.securebanking.service.LoginService;
 import edu.asu.securebanking.service.UserService;
 import edu.asu.securebanking.util.LoginFormValidator;
+import edu.asu.securebanking.view.AccountPdfView;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,7 +25,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -53,6 +62,9 @@ public class AccountSummaryController {
     @Autowired
     @Qualifier("accountExcelView")
     private View accountExcelView;
+    
+    @Resource(name = "accountPdfView")
+    private View accountPdfView;
 
     /**
      * @param session
@@ -93,7 +105,7 @@ public class AccountSummaryController {
 
             if (StringUtils.hasText(view) &&
                     view.equalsIgnoreCase("excel")) {
-                return new ModelAndView(accountExcelView);
+                return new ModelAndView(accountPdfView);
             }
 
             if (user.getUserType().equals(AppConstants.ROLE_MERCHANT)) {
@@ -113,6 +125,5 @@ public class AccountSummaryController {
 
         return new ModelAndView("user/view-statements");
     }
-
 
 }

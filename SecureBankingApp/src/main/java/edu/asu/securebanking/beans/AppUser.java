@@ -13,7 +13,7 @@ import java.util.Date;
  *         Application User
  */
 @Entity
-@Table(name = "USER")
+@Table(name = "user")
 public class AppUser implements Serializable {
 
     @Id
