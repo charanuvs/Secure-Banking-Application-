@@ -49,10 +49,7 @@ public class PaymentController {
     
     @Autowired
     private AccountService accountService;
-    
-    @Autowired
-    @Qualifier("userDAO")
-    private UserDAO userDAO;
+   
 
     @Autowired
     private EmailService emailService;
@@ -129,6 +126,11 @@ public class PaymentController {
         	session.setAttribute("transaction.err", "Your transaction was not processed. \nPayment transactions must be to a merchant acount, and transfers must be to user acounts.");
         	return "/user/payment-deny";
         } 
+        // check for upper bound
+        else if (amount.compareTo(new BigDecimal("1000000")) > 0) {
+        	session.setAttribute("transaction.err", "Your transaction was not processed. \nReason: Max amount for a single transaction is $1,000,000.");
+        	return "/user/payment-deny";
+        }
         // check if user has sufficient funds
         else if (fromAccount.getBalance().compareTo(amount) == -1) {
         	session.setAttribute("transaction.err", "Your transaction was not processed. \nReason: Insufficient funds.");

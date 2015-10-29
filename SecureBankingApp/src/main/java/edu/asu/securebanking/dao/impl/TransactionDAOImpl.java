@@ -50,7 +50,6 @@ public class TransactionDAOImpl extends AbstractDAO implements TransactionDAO {
 	public List<Transaction> getPendingCriticalTransactions(){
 		Criteria criteria = getSession().createCriteria(Transaction.class);
         criteria.add(Restrictions.eq("status", "PENDING"));
-        criteria.add(Restrictions.ge("amount", new BigDecimal("10000")));
         criteria.addOrder(Order.asc("date"));
         return criteria.list();
 	}
