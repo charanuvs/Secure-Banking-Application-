@@ -24,7 +24,7 @@
         <c:url var="formAction" value="/user/payment/validate"/>
         <form:form method="post"
                    class="form-horizontal" commandName="transaction" action="${formAction}">
-            <legend>Update Info</legend>
+            <legend>Transaction Request</legend>
             <form:errors path="*" cssClass="alert alert-danger" element="div"></form:errors>
             <div class="form-group">
                 <label class="col-sm-4 control-label" for="fromAccountNumber">From Account</label>
@@ -52,7 +52,7 @@
             </div>
 
             <div class="form-group">
-                <label class="col-sm-4 control-label" for="transactionType">Amount</label>
+                <label class="col-sm-4 control-label" for="transactionType">Type</label>
 
                 <div class="col-sm-7">
                     <form:select path="transactionType" items="${types}" cssClass="form-control"/>

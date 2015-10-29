@@ -57,11 +57,8 @@ public class PaymentController {
 
     @Autowired
     private TransactionService transactionService;
-    /*
-    @Autowired
-    @Qualifier("paymentValidator")
-    private Validator paymentValidator;
-    */
+
+
     @RequestMapping(value = "/user/payment", method = RequestMethod.GET)
     public String payment(@ModelAttribute("transaction") Transaction transaction, final Model model) {
 		PageViewBean page = new PageViewBean();
@@ -79,6 +76,15 @@ public class PaymentController {
                           Model model,
                           BindingResult result,
                           HttpSession session) throws AppBusinessException {
+    	
+        // check fields
+        if (!isNumeric(transaction.getToAccountNumber()) 
+        		|| !isNumeric(transaction.getFromAccountNumber())
+        		|| !isNumeric(transaction.getAmountString())
+        		|| Double.parseDouble(transaction.getAmountString()) <= 0){
+        	session.setAttribute("transaction.err", "Your transaction was not processed. \nAll fields must be positive numbers");
+        	return "/user/payment-deny";
+        }
     	
     	LOGGER.info(transaction);
 
@@ -150,6 +156,7 @@ public class PaymentController {
             transaction.setAmount(amount);      
         	transaction.setTransactionType(transType);            
             transaction.setStatus(new String("PENDING"));
+            transaction.setAuthEmployee((AppUser)session.getAttribute(AppConstants.LOGGEDIN_USER));
             
             Date currentDate = new Date();
             
@@ -170,40 +177,7 @@ public class PaymentController {
         }
     }
     
-    /*
-    @RequestMapping(value = {"/user/payment/critical"},
-            method = RequestMethod.POST)
-    public String updatePassword(
-            Model model,
-            HttpSession session,
-            BindingResult result) {
-        AppUser loggedInUser = (AppUser)
-                session.getAttribute(AppConstants.LOGGEDIN_USER);
-        String role = loggedInUser.getUserType();
-
-        PageViewBean page = new PageViewBean();
-        model.addAttribute("page", page);
-
-        try {
-
-            // OTP and send the message
-            String otp = otpService.generateOTP();
-            session.setAttribute("transaction.critical.otp", otp);
-            // send email
-            emailService.sendEmail(loggedInUser.getEmail(), "OTP to submit your transaction",
-                    "The OTP to submit your transaction: " + otp);
-
-        } catch (Exception e) {
-            page.setValid(false);
-            page.setMessage(AppConstants.DEFAULT_ERROR_MSG);
-            return "message";
-        }
-
-        return "user/submit-critical-transaction-otp";
-    }
-    
- */   
-    
+ 
     
     @RequestMapping(value = "/user/payment/confirm-critical", method = RequestMethod.POST)
 	public String addCriticalTransaction(/*@ModelAttribute("transaction") Transaction transaction,*/
@@ -222,31 +196,24 @@ public class PaymentController {
  
 
 	    Transaction transaction = new Transaction();
-	  
-	    
-	
+
 		PageViewBean page = new PageViewBean();
 		model.addAttribute("page", page);
 		model.addAttribute("page", page);
-	/*	
-		Integer toAccountNumberInt = Integer.parseInt((String) session.getAttribute("transaction.critical.toAccount"));
-	    Integer fromAccountNumberInt = Integer.parseInt((String) session.getAttribute("transaction.critical.fromAccount"));
-	
-	    Account toAccount = accountService.getAccount(toAccountNumberInt);
-	    Account fromAccount = accountService.getAccount(fromAccountNumberInt);
-	  */  
+
 		
 		Account toAccount = (Account) session.getAttribute("transaction.critical.toAccount");
 		Account fromAccount = (Account) session.getAttribute("transaction.critical.fromAccount");
 		
 	    String transType = (String) session.getAttribute("transaction.critical.transactionType");
 	    BigDecimal amount = (BigDecimal) session.getAttribute("transaction.critical.amount");
-	    
-	
+
+	    //paymentValidator.validate(transaction, arg1);
 		transaction.setToAccount(toAccount);
 		transaction.setFromAccount(fromAccount);
-		
-	    transaction.setAmount(amount);      
+	    transaction.setAmount(amount);
+	    
+	    
 		transaction.setTransactionType(transType);            
 	    transaction.setStatus(new String("PENDING"));
 	    
@@ -268,5 +235,18 @@ public class PaymentController {
 	    return "/user/payment-confirm";
 	
 	}
+    
+    public static boolean isNumeric(String str)  
+    {  
+      try  
+      {  
+        double d = Double.parseDouble(str);  
+      }  
+      catch(NumberFormatException nfe)  
+      {  
+        return false;  
+      }  
+      return true;  
+    }
     
 }
