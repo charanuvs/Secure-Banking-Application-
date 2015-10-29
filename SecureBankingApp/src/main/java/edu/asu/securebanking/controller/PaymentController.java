@@ -3,6 +3,7 @@ package edu.asu.securebanking.controller;
 
 import edu.asu.securebanking.beans.Transaction;
 import edu.asu.securebanking.beans.PageViewBean;
+import edu.asu.securebanking.beans.PasswordBean;
 import edu.asu.securebanking.constants.AppConstants;
 import edu.asu.securebanking.dao.TransactionDAO;
 import edu.asu.securebanking.exceptions.AppBusinessException;
@@ -31,6 +32,7 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Rishabh
@@ -100,7 +102,7 @@ public class PaymentController {
         	
         }
         // check if user owns the from account
-        else if (!fromAccount.getUser().getUserId().equals(session.getAttribute(AppConstants.LOGGEDIN_USER))) {
+        else if (!fromAccount.getUser().getUserId().equals(((AppUser) session.getAttribute(AppConstants.LOGGEDIN_USER)).getUserId())) {
         	session.setAttribute("transaction.err", "Your transaction was not processed. \nYou must be the owner of the source acount.");
         	return "/user/payment-deny";
         }
@@ -117,6 +119,27 @@ public class PaymentController {
         else if (fromAccount.getBalance().compareTo(amount) == -1) {
         	session.setAttribute("transaction.err", "Your transaction was not processed. \nReason: Insufficient funds.");
         	return "/user/payment-deny";
+        }
+        // check for critical transaction
+        else if (amount.compareTo(new BigDecimal("10000")) >= 0) {
+        	session.setAttribute("transaction.critical.amount", amount);
+        	session.setAttribute("transaction.critical.fromAccount", fromAccount);
+        	session.setAttribute("transaction.critical.toAccount", toAccount);
+        	session.setAttribute("transaction.critical.transactionType", transType);
+        	
+        	AppUser loggedInUser = (AppUser)
+                    session.getAttribute(AppConstants.LOGGEDIN_USER);
+        	
+        	session.setAttribute("transaction.critical.postUrl", "/user/payment/confirm-critical");
+        	
+        	// OTP and send the message
+            String otp = otpService.generateOTP();
+            session.setAttribute("transaction.critical.otp", otp);
+            // send email
+            emailService.sendEmail(loggedInUser.getEmail(), "OTP to submit your transaction",
+                    "The OTP to submit your transaction: " + otp);
+        	
+            return "user/submit-critical-transaction-otp";
         }
         // process the transaction
         else {
@@ -141,16 +164,109 @@ public class PaymentController {
             session.setAttribute("user.payment", transaction);
             LOGGER.info("Transnew: " + transaction);
             transactionService.addTransaction(transaction);
-            /*
-            // OTP and send the message
-            String otp = otpService.generateOTP();
-            session.setAttribute("payment.otp", otp);
-            // send email
-            emailService.sendEmail(loggedInUser.getEmail(), "OTP to process your payment",
-                    "The OTP to process your payment: " + otp);
-            */
+
             
             return "/user/payment-confirm";
         }
     }
+    
+    /*
+    @RequestMapping(value = {"/user/payment/critical"},
+            method = RequestMethod.POST)
+    public String updatePassword(
+            Model model,
+            HttpSession session,
+            BindingResult result) {
+        AppUser loggedInUser = (AppUser)
+                session.getAttribute(AppConstants.LOGGEDIN_USER);
+        String role = loggedInUser.getUserType();
+
+        PageViewBean page = new PageViewBean();
+        model.addAttribute("page", page);
+
+        try {
+
+            // OTP and send the message
+            String otp = otpService.generateOTP();
+            session.setAttribute("transaction.critical.otp", otp);
+            // send email
+            emailService.sendEmail(loggedInUser.getEmail(), "OTP to submit your transaction",
+                    "The OTP to submit your transaction: " + otp);
+
+        } catch (Exception e) {
+            page.setValid(false);
+            page.setMessage(AppConstants.DEFAULT_ERROR_MSG);
+            return "message";
+        }
+
+        return "user/submit-critical-transaction-otp";
+    }
+    
+ */   
+    
+    
+    @RequestMapping(value = "/user/payment/confirm-critical", method = RequestMethod.POST)
+	public String addCriticalTransaction(/*@ModelAttribute("transaction") Transaction transaction,*/
+			          @RequestParam("otp") String otp,
+	                  Model model,
+	                  //BindingResult result,
+	                  HttpSession session) throws AppBusinessException {
+    	
+    	LOGGER.info("OTP: " + otp);
+ 
+	    // validate OTP
+	    if (!otp.equals(session.getAttribute("transaction.critical.otp").toString())) {
+	    	session.setAttribute("transaction.err", "Your transaction was not processed. \nReason: Incorrect OTP.");
+	    	return "/user/payment-deny";
+	    }
+ 
+
+	    Transaction transaction = new Transaction();
+	  
+	    
+	
+		PageViewBean page = new PageViewBean();
+		model.addAttribute("page", page);
+		model.addAttribute("page", page);
+	/*	
+		Integer toAccountNumberInt = Integer.parseInt((String) session.getAttribute("transaction.critical.toAccount"));
+	    Integer fromAccountNumberInt = Integer.parseInt((String) session.getAttribute("transaction.critical.fromAccount"));
+	
+	    Account toAccount = accountService.getAccount(toAccountNumberInt);
+	    Account fromAccount = accountService.getAccount(fromAccountNumberInt);
+	  */  
+		
+		Account toAccount = (Account) session.getAttribute("transaction.critical.toAccount");
+		Account fromAccount = (Account) session.getAttribute("transaction.critical.fromAccount");
+		
+	    String transType = (String) session.getAttribute("transaction.critical.transactionType");
+	    BigDecimal amount = (BigDecimal) session.getAttribute("transaction.critical.amount");
+	    
+	
+		transaction.setToAccount(toAccount);
+		transaction.setFromAccount(fromAccount);
+		
+	    transaction.setAmount(amount);      
+		transaction.setTransactionType(transType);            
+	    transaction.setStatus(new String("PENDING"));
+	    
+	    Date currentDate = new Date();
+	    
+	    //Date Format needs to be like yyyy-mm-dd
+	    transaction.setDate(currentDate);
+	    
+	    session.setAttribute("user.payment", transaction);
+	
+	    AppUser loggedInUser = (AppUser)
+	            session.getAttribute(AppConstants.LOGGEDIN_USER);
+	    
+	    session.setAttribute("user.payment", transaction);
+	    LOGGER.info("Transnew: " + transaction);
+	    transactionService.addTransaction(transaction);
+
+	    
+	    return "/user/payment-confirm";
+	
+	}
+    
 }
