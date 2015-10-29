@@ -5,6 +5,7 @@ import edu.asu.securebanking.beans.AppUser;
 import edu.asu.securebanking.beans.PageViewBean;
 import edu.asu.securebanking.beans.Transaction;
 import edu.asu.securebanking.constants.AppConstants;
+import edu.asu.securebanking.dao.UserDAO;
 import edu.asu.securebanking.exceptions.AppBusinessException;
 import edu.asu.securebanking.service.AccountService;
 import edu.asu.securebanking.service.EmailService;
@@ -38,6 +39,10 @@ public class ManagerController {
 
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    @Qualifier("userDAO")
+    private UserDAO userDAO;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -507,6 +512,9 @@ public class ManagerController {
                              HttpSession session) {
         PageViewBean page = new PageViewBean();
         model.addAttribute("page", page);
+        
+        AppUser loggedInUser = (AppUser)
+                session.getAttribute(AppConstants.LOGGEDIN_USER);
 
         try {
         	Transaction transaction = transactionService.getTransaction(transactionId);
@@ -523,6 +531,7 @@ public class ManagerController {
         	}
         	
         	transaction.setStatus("COMPLETE");
+        	transaction.setAuthEmployee(loggedInUser);
         	
         	LOGGER.info("TRANSACTION: " + transaction);
         	

@@ -5,6 +5,7 @@ import edu.asu.securebanking.beans.AppUser;
 import edu.asu.securebanking.beans.PageViewBean;
 import edu.asu.securebanking.beans.Transaction;
 import edu.asu.securebanking.constants.AppConstants;
+import edu.asu.securebanking.dao.UserDAO;
 import edu.asu.securebanking.exceptions.AppBusinessException;
 import edu.asu.securebanking.service.AccountService;
 import edu.asu.securebanking.service.EmailService;
@@ -38,6 +39,10 @@ public class EmployeeController {
 
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    @Qualifier("userDAO")
+    private UserDAO userDAO;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -459,8 +464,12 @@ public class EmployeeController {
     public String approveTransaction(@PathVariable("transactionId") String transactionId,
                              Model model,
                              HttpSession session) {
+    	
         PageViewBean page = new PageViewBean();
         model.addAttribute("page", page);
+        
+        AppUser loggedInUser = (AppUser)
+                session.getAttribute(AppConstants.LOGGEDIN_USER);
 
         try {
         	Transaction transaction = transactionService.getTransaction(transactionId);
@@ -478,10 +487,12 @@ public class EmployeeController {
         	
         	transaction.setStatus("COMPLETE");
         	
+        	LOGGER.info("AUTH_EMP: " + loggedInUser.getUserId());
+        	
+        	transaction.setAuthEmployee(loggedInUser);
+        	
         	LOGGER.info("TRANSACTION: " + transaction);
         	
-        	// TODO
-        	//transaction.setAuthEmployee(authEmployee);
         	
         	Account toAccount = accountService.getAccount(transaction.getToAccount().getAccountNum());
         	Account fromAccount = accountService.getAccount(transaction.getFromAccount().getAccountNum());

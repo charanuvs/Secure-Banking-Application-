@@ -13,6 +13,7 @@ import edu.asu.securebanking.service.EmailService;
 import edu.asu.securebanking.service.TransactionService;
 import edu.asu.securebanking.beans.Account;
 import edu.asu.securebanking.beans.AppUser;
+import edu.asu.securebanking.dao.UserDAO;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -48,6 +49,10 @@ public class PaymentController {
     
     @Autowired
     private AccountService accountService;
+    
+    @Autowired
+    @Qualifier("userDAO")
+    private UserDAO userDAO;
 
     @Autowired
     private EmailService emailService;
@@ -76,6 +81,9 @@ public class PaymentController {
                           Model model,
                           BindingResult result,
                           HttpSession session) throws AppBusinessException {
+    	
+    	AppUser loggedInUser = (AppUser)
+                session.getAttribute(AppConstants.LOGGEDIN_USER);
     	
         // check fields
         if (!isNumeric(transaction.getToAccountNumber()) 
@@ -132,9 +140,9 @@ public class PaymentController {
         	session.setAttribute("transaction.critical.fromAccount", fromAccount);
         	session.setAttribute("transaction.critical.toAccount", toAccount);
         	session.setAttribute("transaction.critical.transactionType", transType);
+        	session.setAttribute("transaction.critical.transactionType", transType);
         	
-        	AppUser loggedInUser = (AppUser)
-                    session.getAttribute(AppConstants.LOGGEDIN_USER);
+        	
         	
         	session.setAttribute("transaction.critical.postUrl", "/user/payment/confirm-critical");
         	
@@ -156,7 +164,7 @@ public class PaymentController {
             transaction.setAmount(amount);      
         	transaction.setTransactionType(transType);            
             transaction.setStatus(new String("PENDING"));
-            transaction.setAuthEmployee((AppUser)session.getAttribute(AppConstants.LOGGEDIN_USER));
+            //transaction.setAuthEmployee(userDAO.getUser(loggedInUser.getUserId()));
             
             Date currentDate = new Date();
             
@@ -164,9 +172,6 @@ public class PaymentController {
             transaction.setDate(currentDate);
             
             session.setAttribute("user.payment", transaction);
-
-            AppUser loggedInUser = (AppUser)
-                    session.getAttribute(AppConstants.LOGGEDIN_USER);
             
             session.setAttribute("user.payment", transaction);
             LOGGER.info("Transnew: " + transaction);
@@ -217,6 +222,7 @@ public class PaymentController {
 		transaction.setTransactionType(transType);            
 	    transaction.setStatus(new String("PENDING"));
 	    
+	    
 	    Date currentDate = new Date();
 	    
 	    //Date Format needs to be like yyyy-mm-dd
@@ -226,6 +232,8 @@ public class PaymentController {
 	
 	    AppUser loggedInUser = (AppUser)
 	            session.getAttribute(AppConstants.LOGGEDIN_USER);
+	    
+	    //transaction.setAuthEmployee(userDAO.getUser(loggedInUser.getUserId()));
 	    
 	    session.setAttribute("user.payment", transaction);
 	    LOGGER.info("Transnew: " + transaction);
